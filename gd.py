@@ -1,4 +1,7 @@
-def stochastic_gradient_descent(X, Y, init_param, cost_function, mu=1e-4, decay=1e-2, max_iter=1e4, \
+import numpy as np
+
+#http://machinelearningmastery.com/using-learning-rate-schedules-deep-learning-models-python-keras/
+def stochastic_gradient_descent(X, Y, cost_function, init_param=None, mu=1e-4, decay=1e-2, max_iter=1e4, \
 								min_weight_dist=1e-7, seed=42, intercept=False, verbose=False):
 	"""
 	:param X: our data
@@ -15,45 +18,45 @@ def stochastic_gradient_descent(X, Y, init_param, cost_function, mu=1e-4, decay=
 	"""
 
 	assert(X.shape[0]==len(Y))
-	try:
-		weight_dist = np.inf
-		param = np.array(init_param)
-		hist_params = []
-		iter_num = 0
-		epoch = 0
-		np.random.seed(seed)
-		costs = []
+	if not intercept:
+		X = np.c_[np.ones(X.shape[0]), X]
 
-		if not intercept:
-			X = np.c_[np.ones(X.shape[0]), X]
-
-		while weight_dist > min_weight_dist and iter_num < max_iter:
-			learning_rate = mu / (1 + decay*epoch)
-			for random_ind in np.random.shuffle(range(X.shape[0])):
-
-				hist_params.append(param)
-				cost = cost_function(X, Y, param)
-				costs.append(cost)
-				pred = np.dot(X[random_ind, :], param)
-				error = pred - Y[random_ind]
-
-				gradient = X[random_ind, :].T.dot(error) * 2
-				param -= learning_rate * gradient
-				weight_dist = np.sqrt(sum((param - init_param) ** 2))
-				init_param = param
-				iter_num += 1
-			epoch += 1
-			if(verbose):
-				print 'Epoch {}, iteration {}, weight distance {}'.format(epoch, iter, weight_dist)
-		return param, costs
-
-	except Exception as inst:
-		print inst.args  # arguments stored in .args
-		print type(inst)  # the exception instance
-		print inst
+	if init_param is None:
+		init_param = np.zeros(X.shape[1])
+	weight_dist = np.inf
+	param = np.array(init_param)
+	hist_params = []
+	iter_num = 0
+	epoch = 0
+	np.random.seed(seed)
+	costs = []
 
 
-def gradient_descent(X, Y, cost_function, init_param, max_iter=1e4, mu=1e-2,, intercept=False):
+
+	indexes = np.arange(X.shape[0])
+	while weight_dist > min_weight_dist and iter_num < max_iter:
+		learning_rate = mu / (1 + decay*epoch)
+		np.random.shuffle(indexes)
+		for random_ind in indexes:
+
+			hist_params.append(param)
+			cost = cost_function(X, Y, param)
+			costs.append(cost)
+			pred = np.dot(X[random_ind, :], param)
+			error = pred - Y[random_ind]
+
+			gradient = X[random_ind, :].T.dot(error) * 2
+			param -= learning_rate * gradient
+			weight_dist = np.sqrt(sum((param - init_param) ** 2))
+			init_param = param
+			iter_num += 1
+		epoch += 1
+		if(verbose):
+			print 'Epoch {}, iteration {}, weight distance {}'.format(epoch, iter, weight_dist)
+	return param, costs
+
+
+def gradient_descent(X, Y, cost_function, init_param=None, max_iter=1e4, mu=1e-2, intercept=False):
 	"""
 	param:  x, y, init_param, iters, mu
 	:param x: data
@@ -66,6 +69,11 @@ def gradient_descent(X, Y, cost_function, init_param, max_iter=1e4, mu=1e-2,, in
 	"""
 
 	try:
+		if not intercept:
+			X = np.c_[np.ones(X.shape[0]), X]
+
+		if init_param is None:
+			init_param = np.zeros(X.shape[1])
 		# let's makr param's type numpy array for our cost function
 		param = np.array(init_param)
 		# we'll colect history value of param fo visualization
@@ -73,10 +81,7 @@ def gradient_descent(X, Y, cost_function, init_param, max_iter=1e4, mu=1e-2,, in
 		# it's history of cost function
 		costs = []
 
-		if not intercept:
-			X = np.c_[np.ones(X.shape[0]), X]
-
-		for i in range(iters):
+		for i in range(max_iter):
 			hist_param.append(param)
 			cost = cost_function(X, Y, param)
 			costs.append(cost)
