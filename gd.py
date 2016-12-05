@@ -24,6 +24,7 @@ def stochastic_gradient_descent(X, Y, cost_function, init_param=None, mu=1e-4, d
 
     if init_param is None:
         init_param = np.zeros(X.shape[1])
+
     weight_dist = np.inf
     param = np.array(init_param)
     hist_params = []
@@ -33,26 +34,26 @@ def stochastic_gradient_descent(X, Y, cost_function, init_param=None, mu=1e-4, d
     costs = []
 
     indexes = np.arange(X.shape[0])
-    while weight_dist > min_weight_dist and iter_num < max_iter:
+    while True:
         learning_rate = mu / (1 + decay * epoch)
         np.random.shuffle(indexes)
         for random_ind in indexes:
-            hist_params.append(param)
+            if weight_dist < min_weight_dist or iter_num > max_iter:
+                return param, costs
+
             pred = np.dot(X[random_ind, :], param)
             error = pred - Y[random_ind]
-
             gradient = X[random_ind, :].T.dot(error) * 2
             param -= learning_rate * gradient
-            weight_dist = np.sqrt(sum((param - init_param) ** 2))
-            init_param = param
+            weight_dist = np.sqrt(np.sum((param - init_param) ** 2))
+            init_param = np.copy(param)
+            hist_params.append(param)
             iter_num += 1
         epoch += 1
         cost = cost_function(X, Y, param)
         costs.append(cost)
         if (verbose):
             print 'Epoch {}, iteration {}, weight distance {}, costs {}'.format(epoch, iter_num, weight_dist, cost)
-
-    return param, costs
 
 
 def gradient_descent(X, Y, cost_function, init_param=None, max_iter=1e4, mu=1e-2, intercept=False):
