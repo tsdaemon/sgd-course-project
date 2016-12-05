@@ -11,7 +11,7 @@ def stochastic_gradient_descent(X, Y, cost_function, init_param=None, mu=1e-4, d
     :param mu: learning rate
     :param decay: learning rate decay
     :param max_iter: max iteration
-    :param min_weight_dist: max distsnce between the weights
+    :param min_weight_dist: max distance between the weights
     :param seed: random seed if you need
     :param intercept: ask if your X have 1 column
     :param verbose: if you want some comment's while running
@@ -38,8 +38,6 @@ def stochastic_gradient_descent(X, Y, cost_function, init_param=None, mu=1e-4, d
         np.random.shuffle(indexes)
         for random_ind in indexes:
             hist_params.append(param)
-            cost = cost_function(X, Y, param)
-            costs.append(cost)
             pred = np.dot(X[random_ind, :], param)
             error = pred - Y[random_ind]
 
@@ -49,8 +47,11 @@ def stochastic_gradient_descent(X, Y, cost_function, init_param=None, mu=1e-4, d
             init_param = param
             iter_num += 1
         epoch += 1
+        cost = cost_function(X, Y, param)
+        costs.append(cost)
         if (verbose):
-            print 'Epoch {}, iteration {}, weight distance {}'.format(epoch, iter, weight_dist)
+            print 'Epoch {}, iteration {}, weight distance {}, costs {}'.format(epoch, iter_num, weight_dist, cost)
+
     return param, costs
 
 
@@ -96,5 +97,6 @@ def gradient_descent(X, Y, cost_function, init_param=None, max_iter=1e4, mu=1e-2
 
 
 def square_distance_cost_function(X, Y, param):
-    param = np.array(param).reshape((X.shape[1], -1))
+    param = param.T
+    Y = Y.T
     return np.sum((X.dot(param) - Y) ** 2, axis=0) / X.shape[0]
