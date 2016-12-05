@@ -44,9 +44,9 @@ def stochastic_gradient_descent(X, Y, cost_function, init_param=None, mu=1e-4, d
             pred = np.dot(X[random_ind, :], param)
             error = pred - Y[random_ind]
             gradient = X[random_ind, :].T.dot(error) * 2
-            param -= learning_rate * gradient
+            param = param - learning_rate * gradient
             weight_dist = np.sqrt(np.sum((param - init_param) ** 2))
-            init_param = np.copy(param)
+            init_param = param
             hist_params.append(param)
             iter_num += 1
         epoch += 1

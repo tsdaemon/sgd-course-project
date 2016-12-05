@@ -3,7 +3,7 @@ from sklearn.linear_model import LinearRegression
 import sklearn.datasets as ds
 import numpy as np
 
-X_train, y_train = ds.make_regression(n_samples=10000, n_features=10, n_informative=2, bias=50.0, noise=20.0, \
+X_train, y_train = ds.make_regression(n_samples=1000, n_features=10, n_informative=2, bias=50.0, noise=20.0, \
                                       random_state=2014)
 
 model = LinearRegression()
